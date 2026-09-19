@@ -1,0 +1,172 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed() { return request.auth != null; }
+  function self(uid) { return signed() && request.auth.uid == uid; }
+  function me() { return get(/databases/$(database)/documents/members/$(request.auth.uid)).data; }
+  function active() { return signed() && request.auth.token.email_verified == true && me().status == 'active'; }
+  function owner() { return active() && me().role == 'owner'; }
+  function permission(scope) { return active() && (me().role == 'owner' || (me().role == 'committee' && me().termUntil > request.time.toMillis() && scope in me().permissions)); }
+  function finance() { return permission('finance'); }
+  function readOwn() { return active() && (resource.data.uid == request.auth.uid || finance()); }
+  function validMember(d) {
+   return d.keys().hasAll(['name','email','type','status','discount','role','permissions','termUntil','createdAt','approvedBy'])
+    && d.keys().hasOnly(['name','email','type','status','discount','role','permissions','termUntil','createdAt','approvedBy','updatedAt'])
+    && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+    && d.email is string && d.email.size() <= 254
+    && d.type in ['full','adhoc'] && d.status in ['pending','active','suspended']
+    && d.discount is int && d.discount >= 0 && d.discount <= 100
+    && d.role in ['member','committee','owner'] && d.permissions is list
+    && d.permissions.hasOnly(['finance','activities']) && d.termUntil is number;
+  }
+  function amount(n) { return n is int && n > 0 && n <= 10000000; }
+  function date(d) { return d is string && d.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'); }
+  function validPayment(d) {
+   return d.keys().hasAll(['uid','chargeId','amount','date','reference','method','createdAt'])
+    && d.uid is string && d.chargeId is string && amount(d.amount) && date(d.date)
+    && d.reference is string && d.reference.size() > 0 && d.reference.size() <= 100
+    && d.method in ['Bank transfer','Cash'];
+  }
+  match /members/{uid} {
+   allow get: if self(uid) || finance();
+   allow list: if finance();
+   allow create: if self(uid) && validMember(request.resource.data)
+    && request.resource.data.email == request.auth.token.email
+    && request.resource.data.role == 'member' && request.resource.data.status == 'pending'
+    && request.resource.data.type == 'full' && request.resource.data.discount == 0
+    && request.resource.data.permissions.size() == 0 && request.resource.data.termUntil == 0
+    && request.resource.data.approvedBy == '';
+   allow update: if owner() && validMember(request.resource.data)
+    && request.resource.data.email == resource.data.email
+    && request.resource.data.createdAt == resource.data.createdAt
+    && request.resource.data.approvedBy == request.auth.uid
+    && ((resource.data.role == 'owner' && request.resource.data.role == 'owner' && request.resource.data.status == 'active')
+      || (resource.data.role != 'owner' && request.resource.data.role != 'owner'));
+   allow delete: if false;
+  }
+  match /charges/{chargeId} {
+   allow read: if readOwn();
+   allow create: if finance()
+    && request.resource.data.keys().hasOnly(['uid','label','month','date','amount','paid','discount','kind','createdAt','createdBy'])
+    && request.resource.data.uid is string && request.resource.data.label is string
+    && request.resource.data.month.matches('^[0-9]{4}-[0-9]{2}$') && date(request.resource.data.date)
+    && request.resource.data.amount is int && request.resource.data.amount >= 0
+    && request.resource.data.paid == 0 && request.resource.data.createdBy == request.auth.uid;
+   allow update: if finance() && request.resource.data.uid == resource.data.uid
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paid','amount','originalAmount','waiverReason','waivedBy','waivedAt'])
+    && request.resource.data.amount is int && request.resource.data.amount >= 0
+    && request.resource.data.paid is int && (request.resource.data.paid >= resource.data.paid || owner()) && request.resource.data.paid >= 0
+    && request.resource.data.paid <= request.resource.data.amount
+    && request.resource.data.amount <= resource.data.amount;
+   allow delete: if false;
+  }
+  function reversal() {
+   return owner() && !('voidedAt' in resource.data)
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voidedAt','voidedBy','voidReason'])
+    && request.resource.data.voidedBy == request.auth.uid && request.resource.data.voidedAt is number
+    && request.resource.data.voidReason is string && request.resource.data.voidReason.size() > 0 && request.resource.data.voidReason.size() <= 300;
+  }
+  match /payments/{paymentId} {
+   allow read: if readOwn();
+   allow create: if finance() && validPayment(request.resource.data)
+    && request.resource.data.keys().hasOnly(['uid','chargeId','amount','date','reference','method','createdAt','createdBy'])
+    && request.resource.data.createdBy == request.auth.uid
+    && get(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.uid == request.resource.data.uid
+    && getAfter(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.paid
+     == get(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.paid + request.resource.data.amount;
+   allow update: if reversal();
+   allow delete: if false;
+  }
+  match /submissions/{submissionId} {
+   allow read: if readOwn();
+   allow create: if active() && request.resource.data.uid == request.auth.uid && validPayment(request.resource.data)
+    && request.resource.data.keys().hasOnly(['uid','chargeId','amount','date','reference','method','createdAt','status'])
+    && request.resource.data.status == 'pending'
+    && get(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.uid == request.auth.uid
+    && request.resource.data.amount <= get(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.amount
+     - get(/databases/$(database)/documents/charges/$(request.resource.data.chargeId)).data.paid;
+   allow update: if finance() && resource.data.status == 'pending'
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reason','reviewedBy','reviewedAt'])
+    && request.resource.data.status in ['approved','rejected'] && request.resource.data.reviewedBy == request.auth.uid
+    && (request.resource.data.status == 'rejected' || existsAfter(/databases/$(database)/documents/payments/$(('approved_' + submissionId))));
+   allow delete: if false;
+  }
+  match /expenses/{expenseId} {
+   allow read: if finance();
+   allow create: if finance()
+    && request.resource.data.keys().hasOnly(['category','description','amount','date','reference','createdAt','createdBy'])
+    && amount(request.resource.data.amount) && date(request.resource.data.date)
+    && request.resource.data.category in ['Courts','Shuttlecocks','Tournament','Friendly match','Equipment','Other']
+    && request.resource.data.description is string && request.resource.data.description.size() <= 200
+    && request.resource.data.reference is string && request.resource.data.reference.size() <= 100
+    && request.resource.data.createdBy == request.auth.uid;
+   allow update: if reversal();
+   allow delete: if false;
+  }
+  match /summaries/{period} {
+   allow read: if active();
+   allow create, update: if finance()
+    && request.resource.data.keys().hasOnly(['billed','received','expenses','opening','openingSet'])
+    && request.resource.data.billed is int && request.resource.data.billed >= 0
+    && request.resource.data.received is int && request.resource.data.received >= 0
+    && request.resource.data.expenses is int && request.resource.data.expenses >= 0
+    && request.resource.data.opening is int && request.resource.data.opening >= 0
+    && (owner() || ((!exists(/databases/$(database)/documents/summaries/$(period)) && request.resource.data.opening == 0)
+      || (exists(/databases/$(database)/documents/summaries/$(period)) && request.resource.data.opening == resource.data.opening
+       && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['openingSet']))));
+   allow delete: if false;
+  }
+  function validActivity(d) {
+   return d.keys().hasOnly(['title','kind','date','time','end','venue','courts','capacity','cost','notes','results','status','updatedAt','createdBy'])
+    && d.title is string && d.title.size() > 0 && d.title.size() <= 100
+    && d.kind in ['Club session','Internal tournament','Friendly match'] && date(d.date)
+    && d.time is string && d.end is string && d.venue is string && d.venue.size() <= 160
+    && d.courts is string && d.courts.size() <= 60 && d.capacity is int && d.capacity > 0 && d.capacity <= 200
+    && d.cost is int && d.cost >= 0 && d.cost <= 10000000
+    && d.notes is string && d.notes.size() <= 2000 && d.results is string && d.results.size() <= 4000
+    && d.status in ['Planned','Scheduled','Completed','Cancelled'] && d.createdBy == request.auth.uid;
+  }
+  match /activities/{activityId} {
+   allow read: if active();
+   allow create, update: if permission('activities') && validActivity(request.resource.data);
+   allow delete: if false;
+  }
+  match /rsvps/{rsvpId} {
+   allow read: if readOwn();
+   allow create, update: if active() && request.resource.data.uid == request.auth.uid
+    && request.resource.data.keys().hasOnly(['uid','activityId','status','updatedAt'])
+    && request.resource.data.status in ['going','not-going']
+    && rsvpId == request.resource.data.activityId + '_' + request.auth.uid
+    && get(/databases/$(database)/documents/activities/$(request.resource.data.activityId)).data.status in ['Planned','Scheduled'];
+   allow delete: if false;
+  }
+  match /attendance/{attendanceId} {
+   allow read: if readOwn();
+   allow create: if finance()
+    && request.resource.data.keys().hasOnly(['uid','activityId','date','createdBy','createdAt'])
+    && attendanceId == request.resource.data.activityId + '_' + request.resource.data.uid
+    && request.resource.data.createdBy == request.auth.uid && date(request.resource.data.date)
+    && get(/databases/$(database)/documents/members/$(request.resource.data.uid)).data.status == 'active';
+   allow update, delete: if false;
+  }
+  match /settings/club {
+   allow read: if active();
+   allow create, update: if owner()
+    && request.resource.data.keys().hasOnly(['name','notice','bankName','accountName','accountNumber','qrData'])
+    && request.resource.data.notice is string && request.resource.data.notice.size() <= 1000
+    && request.resource.data.bankName is string && request.resource.data.bankName.size() <= 100
+    && request.resource.data.accountName is string && request.resource.data.accountName.size() <= 100
+    && request.resource.data.accountNumber is string && request.resource.data.accountNumber.size() <= 40
+    && request.resource.data.qrData is string && request.resource.data.qrData.size() <= 210000;
+   allow delete: if false;
+  }
+  match /audit/{eventId} {
+   allow read: if owner();
+   allow create: if active() && request.resource.data.keys().hasOnly(['id','action','actor','at'])
+    && request.resource.data.actor == request.auth.uid && request.resource.data.action is string
+    && request.resource.data.action.size() <= 1000 && request.resource.data.at is number;
+   allow update, delete: if false;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}
