@@ -1,1 +1,15 @@
-{"name":"santai-badminton-club","version":"1.0.0","private":true,"type":"module","scripts":{"test":"node --test tests/domain.test.js","test:rules":"firebase emulators:exec --only firestore --project demo-santai \"node --test tests/rules.test.js\""},"devDependencies":{"@firebase/rules-unit-testing":"5.0.0","firebase":"12.1.0","firebase-tools":"14.14.0"}}
+{
+  "name": "santai-badminton-club",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/domain.test.js",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-santai \"node --test tests/rules.test.js\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.0",
+    "firebase": "12.1.0",
+    "firebase-tools": "14.14.0"
+  }
+}

@@ -1,11 +1,10 @@
-# Verification record — 19 September 2026
+# Verification — version 1.1, 20 September 2026
 
-- **8/8** Node tests passed: discounted monthly fees, integer-sen validation, partial/overpayments, expired/suspended committee permissions, CSV safety, summary deltas, demo transactions and owner reversals.
-- **12/12** Firestore Emulator tests passed: no anonymous/unverified/pending access to club data; own-record query isolation; no self-promotion or member fee changes; owner approval; expired committee denial; payment submission and verification transactions; prevention of fake receipts and member summary writes; activity permissions and own RSVP; bank-details restrictions; owner-only immutable-record reversals; attendance creation and duplicate rejection.
-- **Browser workflows passed** in headless Chromium at desktop 1440px and mobile 390px: all principal navigation screens, tournament creation, expense recording, member role switch, payment submission, menu navigation and no page-level horizontal overflow. No JavaScript page errors were recorded. Wide tables deliberately scroll within their panel.
-- **Standalone DEMO.html passed** when opened directly as a local file: owner dashboard, member role switch, mobile menu, partial payment submission, no page errors or page-level horizontal overflow.
-- Desktop and mobile screenshots were generated and visually inspected for layout. The screenshots show labelled sample data, not club financial records.
+- 9/9 domain/workflow tests passed: ongoing volunteer roles, independent membership/payment plans, discounts, closure months, signed balances and year carry-forward, private cash versus shared surplus, attendance aggregation, recurring court dates, money/CSV safeguards, and payment/stock/publication/year-lock workflows.
+- 13/13 Firestore Emulator tests passed: authentication and approval gates, own-record queries, role/scoped access, appointment controls, private immutable bounded proofs, stable payment approval IDs, requests, closed years, publication fields, stock/court permissions, and signed openings.
+- Desktop and 390px mobile browser workflows passed in Chromium: navigation, publication preview/publish, member fee-change request, screenshot upload and preview, finance fee approval and payment verification, stock use, monthly court generation, member mobile account access. No JavaScript page errors or page-level horizontal overflow. Tables scroll within their containers.
+- Standalone demo was checked as a local file, and desktop/mobile screenshots were visually reviewed. All demonstration records are fictional.
 
-## Not yet verified with your accounts
+## Production acceptance still required
 
-No production GitHub deployment, live Firebase project, email verification/reset delivery or bank QR was available. Complete the README acceptance check with your Firebase project before using real records or inviting members. Emulator tests demonstrate specified rules behaviour; they are not a claim of a comprehensive security audit.
+No live Firebase project, deployment, email delivery, bank QR or real membership login mapping was available. Follow README acceptance checks before using real records. The workbook was reviewed without editing it; historical data has not been imported. Emulator tests verify the listed scenarios, not a comprehensive security audit.
