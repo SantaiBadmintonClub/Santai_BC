@@ -1,101 +1,147 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Santai Badminton Club — Setup guide</title><style>body{font:16px/1.7 system-ui,sans-serif;background:#f3f6f7;color:#17333b;margin:0}main{max-width:950px;margin:40px auto;background:white;padding:40px 48px;border:1px solid #dce7e6;border-radius:16px}h1{line-height:1.25;color:#112c35}h2{margin-top:40px;border-top:1px solid #dde7e6;padding-top:25px}a{color:#256c51}code{background:#edf3f1;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{background:#edf3f1;padding:18px;border-radius:10px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px;display:block;overflow:auto}td,th{border:1px solid #dce6e4;padding:10px;text-align:left}th{background:#eaf2ed}li{margin:9px 0}img{max-width:100%;height:auto;border:1px solid #dce7e6;border-radius:10px}.callout{padding:18px 22px;background:#eaf2ed;border-left:4px solid #256c51}@media(max-width:700px){main{margin:0;padding:24px 20px;border:0;border-radius:0}}@media print{main{max-width:none;border:0;margin:0;padding:0}h2{break-after:avoid}a{color:inherit}}</style></head><body><main><p class="callout"><strong>Start here:</strong> preview the sample club first, then follow the numbered setup instructions below. Your real records are not connected yet.</p><img src="preview-desktop.png" alt="Santai Club dashboard demonstration with income chart and outstanding fee table"><h1>Santai Badminton Club v1.1</h1>
-<p>A club portal for a volunteer-run community badminton club. Source code is editable in VS Code. GitHub stores the code; Firebase Hosting serves the website, Firebase Authentication handles email/password sign-in, and Cloud Firestore holds records and small compressed payment screenshots. No OneDrive or Firebase Storage dependency is added.</p>
-<h2>Start here</h2>
-<p>Open <strong>DEMO.html</strong> directly in Edge to try fictional records without installing anything. Demo changes live in memory and reset when the page reloads. Use the role selector to test Owner, Fee collector, Court coordinator, Shuttle coordinator and Member.</p>
-<p>Open <strong>START-HERE.html</strong> for this guide with screenshots. <code>docs/index.html</code> is the actual website: preview it with VS Code Live Server, not by double-clicking that file. No build step is required for the live source.</p>
-<h2>Version 1.1 workflows</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Santai Badminton Club — Setup guide</title><style>body{font:16px/1.7 system-ui,sans-serif;background:#f3f6f7;color:#17333b;margin:0}main{max-width:950px;margin:40px auto;background:white;padding:40px 48px;border:1px solid #dce7e6;border-radius:16px}h1{line-height:1.25;color:#112c35}h2{margin-top:40px;border-top:1px solid #dde7e6;padding-top:25px}a{color:#256c51}code{background:#edf3f1;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{background:#edf3f1;padding:18px;border-radius:10px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px;display:block;overflow:auto}td,th{border:1px solid #dce6e4;padding:10px;text-align:left}th{background:#eaf2ed}li{margin:9px 0}img{max-width:100%;height:auto;border:1px solid #dce7e6;border-radius:10px}.callout{padding:18px 22px;background:#eaf2ed;border-left:4px solid #256c51}@media(max-width:700px){main{margin:0;padding:24px 20px;border:0;border-radius:0}}@media print{main{max-width:none;border:0;margin:0;padding:0}h2{break-after:avoid}a{color:inherit}}</style></head><body><main><p class="callout"><strong>Start here:</strong> preview the sample club first, then follow the numbered setup instructions below. Your real records are not connected yet.</p><img src="preview-desktop.png" alt="Santai Club dashboard demonstration with income chart and outstanding fee table"><h1>Santai Badminton Club v1.2</h1>
+<p>Version 1.2 updates the volunteer permissions, attendance workflow, month-specific Planner, attendance payments and vendor receipts. It retains GitHub for source code and Firebase Hosting, Authentication and Firestore for the portal. No OneDrive dependency is added.</p>
+<h2>Try the demonstration</h2>
+<p>Open <strong>DEMO.html</strong> in Edge. Click <strong>Explore demonstration</strong>, then change <strong>View as</strong> to Owner, Administrator, Fee collector, Court coordinator, Shuttle coordinator or Member. All examples are fictional; changes reset on reload. The sample month has explicitly approved example fees. Other unset months show no fee.</p>
+<p>The actual website is in <code>docs/</code>. Preview it with VS Code Live Server; do not double-click <code>docs/index.html</code>. No production build step is needed. <code>START-HERE.html</code> contains this guide in a browser-friendly format.</p>
+<h2>Permissions</h2>
 <table>
 <thead>
 <tr>
 <th>Role</th>
-<th>Responsibilities</th>
+<th>Visibility</th>
+<th>Changes allowed</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>Owner</td>
-<td>All functions, membership approval, appoint/remove volunteers, bank/QR settings, reverse incorrect payments/expenses, close/reopen years</td>
+<td>All screens and records</td>
+<td>All operations; appoint/remove Administrators</td>
 </tr>
 <tr>
-<td>Finance</td>
-<td>Fee plans/requests, monthly charges, payment verification, expenses, attendance, opening balances and member statement publication</td>
+<td>Administrator</td>
+<td>Same operational screens, including Settings</td>
+<td>Club settings, membership/committee management, finance, activities, attendance, stock and year controls; cannot change the Owner or appoint/remove Administrators</td>
 </tr>
 <tr>
-<td>Court coordinator</td>
-<td>Monthly schedule, venue/court details, fixtures, tournaments and results</td>
-</tr>
-<tr>
-<td>Shuttle coordinator</td>
-<td>Stock receipts/use/adjustments and replenishment monitoring</td>
+<td>Committee</td>
+<td>All operational records, member accounts, payment screenshots, vendor receipts, stock and Activity log; no Settings screen</td>
+<td>Only assigned finance, activities or stock jobs; may propose attendance and add a guest for court review</td>
 </tr>
 <tr>
 <td>Member</td>
-<td>Own financial account and screenshot records, fee requests, payment reporting, activities, published club statements</td>
+<td>Own account/payment evidence; activities; all-member attendance summary; published statements</td>
+<td>Own interest response, fee requests and payment submissions</td>
 </tr>
 </tbody></table>
-<p>Committee appointments have <strong>no mandatory annual expiry</strong>. Leave the optional end date blank for ongoing service. Owner can change/revoke responsibilities at any time. Every committee member retains ordinary member functions.</p>
-<h3>Membership and fees</h3>
-<p>Permanent membership and billing are separate. In <strong>Club finances → Planner</strong>, click a month for a member to set their arrangement from that month onward. Choose monthly, attendance, or exempt. The percent entered is the amount payable: 62.5% of RM80 is RM50, equivalent to a 37.5% discount. Factors support fractional percentages.</p>
-<p>A plan persists until another plan takes effect. Changes use a month as the billing boundary. Requests made during a month can be approved for that current month or a later one. Where a monthly charge already exists, the approval form requires the revised charge explicitly. Previous attendance charges remain as recorded; correct those individually when necessary. Automatic daily proration is not assumed.</p>
-<p>Members use <strong>My account → Request fee arrangement</strong>. Finance approves or rejects with a reason. Finance may also record a directly agreed arrangement in Planner. Pending requests do not change billing.</p>
-<p><strong>Issue fees</strong> creates monthly charges using the applicable plan and base rate. Duplicate monthly IDs are skipped. Plans shown in the 12-month grid are forecasts until a fee has been issued (marked with a tick). Account balances and shared statements use issued fees only. Generate the appropriate monthly fees before publishing a period statement.</p>
-<p><strong>Rates / closure</strong> records the committee&#39;s base monthly and attendance rates from an effective month. Initial defaults: RM80 monthly and RM15 attendance. The decision/reason appears to members. Closure applies to the selected month only and prevents new generated fees/sessions and RSVP. Existing sessions are shown closed; charges already issued are NOT silently erased. Use <strong>Fees → Correct fee</strong> if the committee decides to remove or reduce them.</p>
-<h3>Court schedule and attendance</h3>
-<p>Create monthly sessions with <strong>Courts &amp; activities → Create monthly court schedule</strong>. The app generates Monday and Wednesday, 21:00–23:00 Malaysia time. Review venue details and mark bookings Scheduled once the venue confirms them. The website does not reserve courts with the venue. Repeating the generator skips existing generated sessions.</p>
-<p>Finance records actual attendance. An approved attendance plan creates the current per-attendance charge, even for a permanent member. Monthly or exempt plans do not get extra attendance charges. Unregistered walk-ins have their name recorded internally under the shared walk-in account. Use a consistent unique name for each guest within one session; a repeated attendee is rejected. If two different guests have the same name, add a distinguishing initial.</p>
-<p>RSVP indicates interest, not a guaranteed reservation or automated capacity limit. Tournament draws and scores are entered as text.</p>
-<h3>Payments, credits and screenshots</h3>
-<p>Members scan the genuine bank QR in their banking app and report amount/date/reference. Select either monthly fees/advance or attendance. A monthly transfer can cover several months; it does not need to match one invoice. Positive monthly balance = credit; negative = arrears. Attendance receipts have a separate personal balance and are aggregated as AhliMendatang in shared reports. A transfer covering both buckets must be recorded in two portions with the same reference, whose amounts add to the actual transfer.</p>
-<p>A screenshot is optional and may be PNG, JPEG or WebP up to 15 MB on selection. It is resized to at most 1,600 pixels on the longest side, converted to JPEG and limited to 250,000 data-URL characters (roughly 183 KB of compressed image). The preview must remain legible. Crop to the payment confirmation if compression cannot reach the limit. Screenshots are kept as separate private Firestore documents and loaded only when opened; the image field is excluded from indexing by the supplied index configuration. Full-resolution originals and bulk videos are not supported.</p>
-<p>Finance checks the screenshot AND bank/cash record before verifying. A screenshot alone never settles a fee. Stable approval IDs and transactions prevent double approval of the same submission. A member can still submit the same external bank reference twice; reviewers must check duplicates against the bank statement. Automatic bank reconciliation is not included.</p>
-<p><strong>Owner reversals</strong> retain the original payment/expense and reason, and restate that transaction&#39;s original reporting month. An incorrect screenshot remains attached to its original submission/entry; reject/reverse it and submit a corrected record, rather than overwrite evidence.</p>
-<h3>Yearly accounts and statements</h3>
-<p>Choose the year and month cutoff on Dashboard, My account, Club finances or Member statements. Payments and expenses are included by actual date, considering both year and month.</p>
-<p>For initial migration only, record each member&#39;s signed opening balance and the club opening cash/bank balance through <strong>Planner → Opening balance</strong>. Member opening is independent of club cash. After that, prior transactions automatically carry into later years. Do not enter the same carry-forward again each January. A newly entered later-year opening intentionally becomes a new baseline, so use that only for an agreed migration/reconciliation, not routine year-end processing. Existing opening entries cannot be overwritten in this interface; incorrect initial entries need owner-assisted correction before going live.</p>
-<p>Owner can close a year in Settings after reconciliation. Closed-year transactions, fees, plans and openings are blocked by Firestore rules. To correct prior history, reopen explicitly. Corrections can alter later carry-forwards, so review affected years and republish statements.</p>
-<p>Finance <strong>Preview / publish statements</strong> creates a deliberate member-visible snapshot for a selected cutoff. This preserves the club&#39;s practice of sharing PenyataAhli and Print, rather than exposing the entire committee ledger. The snapshot includes named monthly balances and aggregate attendance income, but omits payment references, screenshots, opening club funds and closing bank/cash totals. The shared net figure is clearly current-year surplus/deficit. The club payment bank details are still available separately where members need to pay.</p>
-<p>Members can print/save PDF (landscape) and download the named-balance CSV. Share a PDF or screenshot yourself through WhatsApp; the website does not send WhatsApp messages. Later record corrections do not silently change an already published snapshot: finance republishes when ready. The app keeps the latest snapshot for each year/month; earlier revisions are not separately versioned.</p>
-<h3>Shuttle stock</h3>
-<p>Stock quantity is measured in individual shuttlecocks. A tube of 12 means 12 units. Record opening stock, purchases, usage or adjustments. The default low-stock threshold is 24 and the owner can change it. A purchase creates inventory only; finance separately records the paid supplier expense. Opening stock counts are not inferred from past purchase receipts because past usage is unknown.</p>
-<h2>Firebase / GitHub setup</h2>
+<p>Assign several jobs to one volunteer if appropriate. Committee terms have no mandatory expiry. An explicit expired term removes committee visibility and editing rights. Administrator access is broad: assign it only to someone entrusted with club administration. Only the Owner can appoint this role through <strong>Members → Manage</strong>.</p>
+<p>All committee members intentionally receive read access to financial details and evidence, as requested. Ordinary members do not. The payment bank details remain available to members where needed for payment. Hiding Settings does not hide the club payment QR.</p>
+<p>The <strong>Activity log</strong> screen is visible to every committee member. Settings retains the full private backup and financial-year controls for the Owner and Administrator.</p>
+<h2>Court events and attendance</h2>
+<p>Use <strong>Courts &amp; activities</strong> to create a monthly Monday/Wednesday schedule, normally 21:00–23:00 Malaysia time, or add tournaments and friendlies. The schedule does not reserve courts with the venue. Marking a scheduled booking in this portal should follow the venue&#39;s confirmation.</p>
+<p><strong>Cancel event</strong> changes its badge to dark red on light brown and removes <strong>I&#39;m interested</strong>. Events remain in the record. Existing attendance fees are not silently deleted when an event is cancelled: the court coordinator reviews its attendance sheet and marks erroneous attendance Absent. Confirmed Present is blocked for cancelled events and closure months. Once attendance has been confirmed, the event date cannot be changed; create a replacement event instead.</p>
+<h3>Attendance sheet</h3>
 <ol>
-<li>Keep a copy of the previous source and download any existing private database backup before upgrading. Do not commit backup data or the uploaded club workbook to GitHub.</li>
-<li>Copy your existing <strong>public web app config</strong> into <code>docs/firebase-config.js</code>. If you have no project yet, create one in <a href="https://console.firebase.google.com/">Firebase Console</a> using the Spark free plan and add a web app. Never place Admin SDK/service-account secrets in browser files.</li>
-<li>Enable Email/Password in Firebase Authentication. Set a minimum password length of 10 or more. Members register and verify email before owner approval.</li>
-<li>Create the default <strong>Cloud Firestore Standard</strong> database in production mode. Publish the supplied <code>firestore.rules</code> and apply <code>firestore.indexes.json</code>. Do not retain v1.0 rules: v1.1 has new role scopes and private screenshot/statement collections.</li>
-<li>For command-line deployment, install a supported Node.js release and Firebase CLI. This project includes Firebase CLI as a development dependency. In the extracted project folder, use:</li>
+<li>A registered member clicks <strong>I&#39;m interested</strong>. Their response appears in that event&#39;s attendance sheet automatically; it is not yet confirmed attendance. Other users see fresh data on <strong>Refresh</strong>.</li>
+<li>Any committee member opens <strong>Attendance</strong> and may propose Present/Absent. A later member response or committee proposal never overwrites the coordinator&#39;s final decision.</li>
+<li>The court coordinator, Owner or Administrator uses <strong>Confirm / edit</strong> to set final Present/Absent. Repeating confirmation updates the same record and does not create duplicate fees.</li>
+<li>The coordinator can record a registered member even without an interest response. The sheet lists active registered members and previously recorded participants.</li>
+<li>Only confirmed Present counts in the monthly summary. For a registered member, a fee is raised only if that particular month&#39;s Planner arrangement is Attendance. A monthly or exempt arrangement creates no extra attendance charge.</li>
+</ol>
+<h3>AhliMendatang guests have no login</h3>
+<p>On the attendance sheet, choose <strong>+ AhliMendatang / walk-in</strong>. Select the existing returning guest, or enter a new guest name. A guest record is separate from a registered member account: no email, password or sign-in is created. Reuse the same guest record across events and months. For different people with identical names, use a distinguishing initial or nickname.</p>
+<p>Adding a guest proposes attendance. The court coordinator then confirms it. Confirmed guest attendance raises the applicable attendance fee, initially RM15. The fee collector records the guest&#39;s cash/bank payment against the specific visit. Guests cannot upload their own receipts through the portal because they have no login; finance can attach evidence when recording payment.</p>
+<p>An existing genuine registered person who uses attendance-based fees remains a registered member. Changing payment method does not make them an unregistered guest.</p>
+<h3>Monthly attendance summary</h3>
+<p>Every active member can open <strong>Attendance summary</strong> and select the calendar year/month. It lists registered members, including zero attendance after the roster has been synchronised. It counts confirmed Present only, excluding cancelled events.</p>
+<p>Under <strong>AhliMendatang</strong>, guests attending <strong>more than three times (4+)</strong> that month appear by name. Guests with one to three visits are combined in the other-walk-in count. This is a reporting threshold, not a fee discount, monthly cap, registration or membership conversion. Registered members stay in the registered-member section. Each confirmed event counts as one visit.</p>
+<p>Tables scroll horizontally on smaller screens. Print/save PDF is available. The attendance layouts follow AttendanceSheet.jpg and AttendanceSummary.jpg: a dated event sheet and a monthly date-column grid, with separate registered-member and AhliMendatang sections, blue headers and compact borders. ✓ means confirmed Present; × means confirmed Absent; blank means unconfirmed. An interest response is not a present mark. Cancelled dates show C and do not count. Event-sheet printouts hide committee action controls.</p>
+<h2>Month-specific Planner</h2>
+<p><strong>Club finances → Planner</strong> is the only interface for monthly fee corrections. Every unset month defaults to <strong>— / No fee / exempt</strong>. Setting one month never changes an adjacent month.</p>
+<p>Click a member/month cell, choose Monthly fee, Attendance or No fee/exempt, enter the monthly amount if applicable, and give an approval/correction reason. RM80 is the normal reference rate; enter RM50 for an approved RM50 month. The saved amount immediately creates or updates that month&#39;s charge and balance. There is no separate Issue fees step. Attendance/exempt sets the monthly charge to zero. Existing cash payments remain unchanged, so reducing a fee can create credit.</p>
+<p>A member&#39;s fee request identifies one month. Finance reviews it in <strong>Fee Request Verification</strong>; approval uses the same Planner correction workflow. Requests do not change fees until approved. Existing attendance charges are not automatically repriced by later Planner changes: the court coordinator reviews/reconfirms the affected attendance if correction is intended.</p>
+<p><strong>Rates / closure</strong> records the committee&#39;s base rates and announced decisions. Club-wide rates still apply from their effective month until another rate decision; this is separate from individual month-only plans. Closure applies only to the selected month. Existing monthly fees require deliberate Planner correction if waived.</p>
+<h2>Finance tabs</h2>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Planner</td>
+<td>Set/correct each member&#39;s fee for one month</td>
+</tr>
+<tr>
+<td>Payment Summary</td>
+<td>Current calculated <strong>PenyataAhli only</strong>; no Print balance section in this tab</td>
+</tr>
+<tr>
+<td>Payment</td>
+<td>Payment register plus attendance fees, paid amounts, pending balances and credits</td>
+</tr>
+<tr>
+<td>Expenses</td>
+<td>Paid expenses and optional vendor receipts</td>
+</tr>
+<tr>
+<td>Payment Verification</td>
+<td>Review member submissions against bank/cash records</td>
+</tr>
+<tr>
+<td>Fee Request Verification</td>
+<td>Approve/reject member requests for a particular month</td>
+</tr>
+</tbody></table>
+<h3>Attendance settlement</h3>
+<p>Each new attendance payment is allocated to one named participant and event. The Payment tab retains both settled and pending visits. Partial payments are supported: RM5 against RM15 shows RM10 pending; the remaining RM10 settles the visit. A new payment cannot exceed the currently unpaid fee. Concurrent transactions recheck the outstanding amount.</p>
+<p>If one bank transfer pays for several visits, record its portions against those visits using the same bank reference; the portions must add up to the transfer. A transfer covering monthly fees and attendance similarly needs separate portions. Reviewers still check for duplicate external bank transfers: different submissions with the same reference are not automatically merged.</p>
+<p>Monthly payments may cover multiple months or build an advance credit. Monthly and attendance balances remain separate. All attendance receipts, including those from registered members on an attendance plan, are grouped under AhliMendatang in financial statements.</p>
+<p>Finance can <strong>Reverse</strong> an incorrect payment or expense with a reason, then enter the corrected record. Reversal retains the original record and evidence rather than erasing history. If attendance is changed to Absent after payment, its fee becomes zero and the Payment tab displays the resulting credit. No automatic refund or credit transfer is made. Resolve that credit with the fee collector; do not record a fictitious payment to hide it.</p>
+<h3>Payment screenshots and vendor receipts</h3>
+<p>Both are optional PNG/JPEG/WebP images. The browser accepts an image up to 15 MB, compresses it to JPEG (at most 1,600 pixels on its longest side) and caps the saved data URL at 250,000 characters. Check that the amount, date and reference remain readable in the preview; crop an oversized image if necessary. PDF receipts are not supported in this revision: upload a legible image/photo instead.</p>
+<p>Images are stored in separate private Firestore documents and loaded on demand, not with every dashboard refresh. Payment evidence is visible to its member and all committee members. Vendor receipts are committee-only. Images are immutable: reject/reverse and re-enter an incorrect record. Neither image type is published in member statements. A screenshot by itself never verifies receipt of money.</p>
+<h2>Statements, years and stock</h2>
+<p><strong>Preview / publish statements</strong> produces a member-visible PenyataAhli/Print snapshot at the selected cutoff. <strong>Payment Summary</strong> shows the current computed PenyataAhli; Member statements shows the last published snapshot. Republish after corrections. Members may print/save PDF and export the balance table as CSV for sharing through your usual WhatsApp process.</p>
+<p>Positive member balance means credit; negative means arrears. Club opening cash is distinct from member carry-forwards. Club cash includes opening funds; the shared statement&#39;s current-year surplus/deficit excludes them. Ledger dates use both year and month.</p>
+<p>Enter agreed initial balances only once under <strong>Planner → Opening balance</strong>. Later years carry automatically. Do not re-enter the same balance every January. Existing opening entries are not overwritten in the interface; reconcile any erroneous initial entry before going live. Owner/Administrator can close and reopen financial years in Settings. Reopening and changing prior-year records can affect later carry-forwards; review and republish affected statements.</p>
+<p>The stock coordinator records shuttle purchases, use and adjustments in individual shuttlecocks (one tube of 12 = 12 units). Buying stock and recording its cash expense are separate tasks. Adjustments correct stock records while retaining history. The Owner/Administrator sets the low-stock threshold in Settings.</p>
+<h2>Updating an existing installation</h2>
+<ol>
+<li>Back up the current source and database. Keep private data outside the public GitHub repository.</li>
+<li>Preserve your existing <code>docs/firebase-config.js</code> values and Firebase project selection. Replace the application files with this release.</li>
+<li>Deploy <strong>both</strong> the new Firestore rules/index configuration and website. Do not run the old website against the new rules. No new database reset is required.</li>
+<li>In <strong>Settings → Synchronise registered roster</strong>, populate the name-only attendance roster for existing registered members. Future membership approvals/updates maintain it automatically.</li>
+<li>Review existing Planner months. Previously saved explicit plans now apply only to their own month. Existing issued historical charges remain recorded and visible; they are not silently zeroed. Where a historical charge has no exact-month plan, review that cell and save the intended arrangement. Set any required future months individually.</li>
+<li>If v1.0/v1.1 has real attendance or guest data, reconcile it before using the new attendance summary. Old <code>attendance</code> records have no final <code>status</code>, and old guests shared the <code>walkin</code> identity. They are not automatically inferred as confirmed visits or matched to new guest IDs. Use the original records to create named guest identities and reconcile/migrate history with support. <strong>Do not blindly re-enter previously charged visits</strong>, which could duplicate financial charges. Existing unallocated attendance receipts are labelled unallocated and are not assumed to settle new visits. Historical migration is not automated in this package.</li>
+<li>Existing <code>adhoc</code> login accounts are not deleted. If they were created for people who never registered, suspend their portal access through Members and disable their Authentication account in Firebase Console after reviewing their history. Preserve financial records; create guest identities for future visits. A real registered attendance-paying member may keep their login.</li>
+<li>Existing pending attendance-payment submissions without a session allocation need review and re-submission against the correct visit. Monthly submissions remain supported.</li>
+<li>Check balances and assigned responsibilities before inviting members back. Appoint an Administrator only if needed.</li>
+</ol>
+<p>The previously reviewed Excel history has not been imported or changed. Its unresolved dates/classification remain awaiting the Fee Collector&#39;s confirmation.</p>
+<p>For a v1.0 database, also reconcile the old <code>summaries/all</code> club opening into a <code>yearOpenings</code> entry for the original start year. The application warns if that old opening appears unmigrated. Do not enter a second opening if prior transactions already carry it forward.</p>
+<h2>Firebase and GitHub setup / deployment</h2>
+<ol>
+<li>Use your Firebase project&#39;s public web app configuration in <code>docs/firebase-config.js</code>. Never place an Admin SDK/service-account private key in browser code.</li>
+<li>Enable Email/Password Authentication and email verification. Create a default Cloud Firestore Standard database, and use the supplied rules rather than test-mode rules.</li>
+<li>In the extracted project folder in VS Code&#39;s terminal:</li>
 </ol>
 <pre><code class="language-sh">npm ci
 npx firebase login
 npx firebase use --add
 npx firebase deploy --only firestore:rules,firestore:indexes,hosting
 </code></pre>
-<p>Choose your own Firebase project when prompted. The supplied <code>firebase.json</code> already points Hosting to <code>docs/</code>; do not overwrite it with a new initializer. Use <strong>Firebase Hosting</strong>, not the separate Firebase App Hosting product. On Windows, if PowerShell blocks <code>npx.ps1</code>, run these commands in VS Code&#39;s Command Prompt terminal or use <code>npx.cmd</code>.</p>
-<ol start="6">
-<li>Firebase displays the actual hosting URL, normally an address under <code>web.app</code>. Add the hosted domain to Authentication → Settings → Authorized domains if it is not already there. Add localhost for local authentication testing if needed.</li>
-<li>Continue using VS Code Source Control to stage, commit and push the code to GitHub. GitHub remains source/version control; GitHub Pages is not needed for the live portal. Do not publish member workbooks, screenshots or JSON backups in the repository.</li>
-<li>Create your own account through the hosted portal and verify its email. For a NEW installation, find its UID in Firebase Authentication, then update that UID&#39;s Firestore <code>members</code> document in the console: <code>role</code> = <code>owner</code>, <code>status</code> = <code>active</code>, <code>approvedBy</code> = your UID. Keep the other registration-created fields. Sign out/in. Existing owner accounts continue to work.</li>
-<li>Enter bank/QR and club notice in Settings. Test the QR beneficiary in your banking app. Add/approve members, assign volunteer responsibilities, enter the agreed opening balances, and set plans before issuing fees.</li>
+<p>Select your own Firebase project. <code>firebase.json</code> already serves <code>docs/</code> with Firebase Hosting; do not overwrite it with a new initializer. If PowerShell blocks <code>npx.ps1</code>, use the Command Prompt terminal or <code>npx.cmd</code>.</p>
+<ol start="4">
+<li>Add the resulting Hosting domain to Authentication&#39;s authorised domains if needed. Add localhost if using live Authentication in local development.</li>
+<li>For a new installation, register/verify your own account, find its UID in Firebase Authentication, then use Firebase Console to set that UID&#39;s <code>members</code> document to <code>role: owner</code>, <code>status: active</code>, <code>approvedBy: your UID</code>, retaining the other registration fields. Existing Owner accounts continue working.</li>
+<li>Enter the bank details and genuine QR, verify its beneficiary, approve member registrations, assign roles, synchronise the roster, and enter agreed opening balances. Select fees in Planner before publishing statements.</li>
+<li>Use VS Code Source Control to stage the changed source, enter a commit message such as <code>Add attendance workflow and monthly fee controls</code>, commit, and push to GitHub. GitHub holds the source; Firebase Hosting serves this package. Do not commit the club workbook, private backups or real receipt images.</li>
 </ol>
-<h3>If v1.0 already contains real records</h3>
-<p>The same member, charge, payment and expense collections remain in use. Existing v1.0 payments are classified by their linked charge when they lack a bucket field. Their old per-charge <code>paid</code> counters are not used for v1.1 credit calculations; the verified payment ledger is authoritative. Existing member discounts provide a default until replaced with a dated plan. Existing optional committee expiry dates remain as stored: clear them in Manage Member if the appointment should continue indefinitely.</p>
-<p>The old <code>summaries/all</code> club opening amount must be entered once under <strong>Opening balance → Club</strong> for the original start year, after reconciliation. The app warns finance if it detects this unmigrated v1.0 opening. Do not enter last year&#39;s closing cash again if its transactions are already represented. Existing pending v1.0 submissions use the older charge-specific shape: reject/re-submit them in v1.1 after checking they have not already been paid. Do not mix old and new website versions against the live database after upgrading rules.</p>
-<p>Before inviting members back, compare totals with the v1.0 backup and publish the desired member snapshots. No Excel history has been imported automatically. Historical migration needs the owner&#39;s resolved source rows and actual login mappings.</p>
-<h2>Free-plan storage and limits</h2>
-<p>Firebase Spark provides a limited free Firestore quota. Compressed screenshots consume this quota: at the 250,000-character cap, 360 screenshots per year would use roughly 90 MB for the image text alone, plus document/index overhead and other records. Actual images may be smaller; more attendance screenshots increase the number. This is an estimate, not a guarantee of indefinite free retention. Monitor storage and reads, and agree a retention/archive policy before limits are approached. No automatic deletion has been added.</p>
-<p>Firestore is being used here for a small club&#39;s bounded images, not general file hosting. Cloud Storage for Firebase would require a billing-enabled plan. Proof images are not fetched on dashboard refresh. An explicit owner full backup includes all screenshots and can grow large; keep it private. Automated restore, OneDrive integration, bank APIs and automated backup scheduling are not included.</p>
-<p>Finance roles are trusted bookkeepers. Transactions and rules enforce account access and year locks, but application logs are not a tamper-proof audit of changes made directly by a Firebase project administrator. Keep bank reconciliation and private backups.</p>
-<p>The current release loads authorised history on Refresh. For a growing multi-year club, add date-window pagination before record counts substantially increase. Never expose private member data merely by hiding a table column: the member-facing publication is a separate database record with separate access rules.</p>
-<h2>Tests</h2>
-<pre><code class="language-sh">npm test
-npm run test:rules
-</code></pre>
-<p>The rule tests require Java and use a local demo-santai Firestore emulator, not your live project. Negative permission tests intentionally log permission-denied responses. See VERIFICATION.md for completed checks and production checks still needed.</p>
-<h2>Sources</h2>
-<ul>
-<li><a href="https://firebase.google.com/docs/firestore/quotas">Firestore quotas</a></li>
-<li><a href="https://firebase.google.com/docs/hosting/usage-quotas-pricing">Firebase Hosting quotas</a></li>
-<li><a href="https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024">Cloud Storage billing requirements</a></li>
-<li><a href="https://firebase.google.com/docs/cli">Firebase CLI</a></li>
-</ul>
-<p>This source package contains fictional demonstration records only. Keep the separate private workbook review outside the public repository.</p>
+<p>No live deployment has been performed as part of this release.</p>
+<h2>Verification and operating limits</h2>
+<p>Run <code>npm test</code> for calculation/workflow tests and <code>npm run test:rules</code> for the Firestore Emulator tests (requires Java). Tests use the demo-santai local project, not your live database. Expected access denials in negative tests are normal. See VERIFICATION.md for completed checks.</p>
+<p>Before go-live, use separate real test logins for Owner, Administrator, each committee job and Member. Confirm email delivery, appointment/revocation, own-record privacy, read-only committee screens, final attendance permission, payment verification and your real QR beneficiary. Compare financial totals to the agreed source records.</p>
+<p>Small compressed images share your Firestore quota with other records; receipts increase storage use. At the image cap, 360 images use approximately 90 MB of image text before other document/index overhead. Monitor usage and agree a retention policy as records grow. No automatic deletion or OneDrive upload is included. Full private backup includes both image collections. Automated restore, bank integration and WhatsApp sending are not included.</p>
+<p>This version loads authorised history on Refresh. Date-window pagination is a future improvement if multi-year data grows substantially. Application audit entries are useful operational records, not a tamper-proof log of Firebase Console administrators&#39; actions.</p>
 </main></body></html>

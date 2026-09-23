@@ -1,1 +1,15 @@
-{"indexes":[],"fieldOverrides":[{"collectionGroup":"proofs","fieldPath":"image","indexes":[]}]}
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "proofs",
+      "fieldPath": "image",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "expenseProofs",
+      "fieldPath": "image",
+      "indexes": []
+    }
+  ]
+}
