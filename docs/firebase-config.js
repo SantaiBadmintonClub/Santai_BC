@@ -6,3 +6,4 @@ export const firebaseConfig = {
   projectId: "santai-badminton-club",
   appId: "1:262610174139:web:df85d6dc605b8ae2cb299e"
 };
+
